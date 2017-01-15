@@ -1,0 +1,3 @@
+package: github.com/stevenjack/icat-flap
+import:
+- package: github.com/brian-armstrong/gpio
