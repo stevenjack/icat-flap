@@ -1,8 +1,9 @@
+DEFAULT: build
 
-.PHONY: run
-.SILENT: run
-.DEFAULT: run
+build:
+	@echo "=> Building binary"
+	env GOOS=linux GOARCH=arm GOARM=7 go build -v .
 
-run:
-	echo "=> Running app"
-	docker run --privileged -v $(pwd):/app -v /dev/gpiomem:/dev/gpiomem --rm=true -it smaj/icatflap
+copy: build
+	@echo "=> Copy binary"
+	scp ./icat-flap root@192.168.0.250:~/

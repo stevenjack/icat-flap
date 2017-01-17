@@ -35,41 +35,39 @@ func main() {
 
 	log.SetOutput(os.Stdout)
 
-	func() {
-		log.Print("Starting monitoring...")
-		for {
-			pin, value := watcher.Watch()
-			sensor := sensors[pin]
-			sensor.State = value
+	log.Print("Starting monitoring...")
+	for {
+		pin, value := watcher.Watch()
+		sensor := sensors[pin]
+		sensor.State = value
 
-			if sensor.ActivityDetected() {
-				log.Printf("[%s] Activity detected", sensor.ID)
-				sensor.DetectionTime = time.Now()
+		if sensor.ActivityDetected() {
+			log.Printf("[%s] Activity detected", sensor.ID)
+			sensor.DetectionTime = time.Now()
+		} else {
+			if sensor.ID == pir.RFID {
+				movement.LogRFID(sensor)
 			} else {
-				if sensor.ID == pir.RFID {
-					movement.LogRFID(sensor)
-				} else {
-					movement.LogMovement(sensor)
-				}
+				movement.LogMovement(sensor)
 			}
-
-			if movement.Happened() {
-				log.Printf("--##### Movement detected, direction '%s' #####--", movement.InitialStart)
-				movement = pir.Movement{
-					false,
-					false,
-					false,
-					time.Now(),
-					0,
-					"",
-				}
-			}
-
-			if movement.InitialStart == "" && sensor.ID != pir.RFID {
-				movement.InitialStart = sensor.ID
-			}
-
-			sensors[pin] = sensor
 		}
-	}()
+
+		if movement.Happened() {
+			log.Printf("--##### Movement detected, direction '%s' #####--", movement.InitialStart)
+			movement = pir.Movement{
+				false,
+				false,
+				false,
+				time.Now(),
+				0,
+				"",
+			}
+		}
+
+		if movement.InitialStart == "" && sensor.ID != pir.RFID {
+			movement.InitialStart = sensor.ID
+		}
+
+		sensors[pin] = sensor
+	}
 }
